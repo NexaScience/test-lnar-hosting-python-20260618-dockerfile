@@ -1,4 +1,5 @@
 import uuid
+from contextlib import asynccontextmanager
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
@@ -6,10 +7,19 @@ from pydantic import BaseModel
 
 from mcp_server import mcp
 
-app = FastAPI(title="Notes API", version="1.0.0")
+_mcp_app = mcp.http_app(path="/")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with _mcp_app.lifespan(app):
+        yield
+
+
+app = FastAPI(title="Notes API", version="1.0.0", lifespan=lifespan)
 
 # MCP Streamable HTTP エンドポイントを /mcp にマウント
-app.mount("/mcp", mcp.http_app(path="/"))
+app.mount("/mcp", _mcp_app)
 
 # In-memory storage
 _notes: dict[str, dict] = {}
