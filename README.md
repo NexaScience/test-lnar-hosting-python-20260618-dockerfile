@@ -1,20 +1,21 @@
 # test-lnar-hosting-python
 
-Notes の CRUD を提供する FastAPI サーバーと、それを MCP ツールとして公開する MCP サーバーのサンプルです。
+Notes の CRUD を提供する FastAPI サーバーと MCP サーバーのサンプルです。
 
-FastAPI の `/mcp` に MCP Streamable HTTP エンドポイントをマウントしているため、**1プロセス・1ポートで REST API と MCP の両方を提供します**。
+## アーキテクチャ
+
+```
+notes.py          ← ビジネスロジック（共有）
+  ├── api.py      ← FastAPI REST エンドポイント (/notes)
+  └── mcp_server.py ← MCP ツール (/mcp)
+```
+
+REST と MCP はどちらも `notes.py` のロジックを直接呼ぶため、HTTP 経由の自己呼び出しが発生しません。1プロセス・1ポートで REST API と MCP Streamable HTTP の両方を提供します。
 
 ## 起動方法
 
-### 1. 依存関係のインストール
-
 ```bash
 uv sync
-```
-
-### 2. サーバーを起動
-
-```bash
 uvicorn api:app --reload
 ```
 
@@ -47,9 +48,3 @@ python mcp_server.py
 ```bash
 npx @modelcontextprotocol/inspector python mcp_server.py
 ```
-
-## 環境変数
-
-| 変数名 | 説明 | デフォルト値 |
-|---|---|---|
-| `API_BASE_URL` | FastAPI サーバーの URL（MCP ツールが内部で使用） | `http://localhost:8000` |
