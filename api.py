@@ -4,7 +4,12 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from mcp_server import mcp
+
 app = FastAPI(title="Notes API", version="1.0.0")
+
+# MCP Streamable HTTP エンドポイントを /mcp にマウント
+app.mount("/mcp", mcp.http_app(path="/"))
 
 # In-memory storage
 _notes: dict[str, dict] = {}
