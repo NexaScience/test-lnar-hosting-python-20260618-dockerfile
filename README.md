@@ -1,5 +1,9 @@
 # test-lnar-hosting-python
 
+Notes の CRUD を提供する FastAPI サーバーと、それを MCP ツールとして公開する MCP サーバーのサンプルです。
+
+FastAPI の `/mcp` に MCP Streamable HTTP エンドポイントをマウントしているため、**1プロセス・1ポートで REST API と MCP の両方を提供します**。
+
 ## 起動方法
 
 ### 1. 依存関係のインストール
@@ -8,29 +12,37 @@
 uv sync
 ```
 
-### 2. FastAPI サーバーを起動（ターミナル 1）
+### 2. サーバーを起動
 
 ```bash
 uvicorn api:app --reload
 ```
 
-API ドキュメント: http://localhost:8000/docs
+- REST API ドキュメント: http://localhost:8000/docs
+- MCP エンドポイント: http://localhost:8000/mcp
 
-### 3. MCP サーバーを起動（ターミナル 2）
+## MCP クライアントからの接続
 
-stdio transport（Claude Desktop / MCP Inspector などで使用）:
+`supergateway` 経由で Streamable HTTP に接続する場合（lnar ダッシュボードで表示される設定）:
+
+```json
+{
+  "mcpServers": {
+    "test-lnar-hosting-python": {
+      "command": "npx",
+      "args": ["-y", "supergateway", "--streamableHttp", "http://localhost:8000/mcp"]
+    }
+  }
+}
+```
+
+stdio transport（Claude Desktop / MCP Inspector 直接接続）を使う場合:
 
 ```bash
 python mcp_server.py
 ```
 
-または mcp CLI で起動:
-
-```bash
-mcp run mcp_server.py
-```
-
-### 4. MCP Inspector で動作確認
+### MCP Inspector で動作確認
 
 ```bash
 npx @modelcontextprotocol/inspector python mcp_server.py
@@ -40,4 +52,4 @@ npx @modelcontextprotocol/inspector python mcp_server.py
 
 | 変数名 | 説明 | デフォルト値 |
 |---|---|---|
-| `API_BASE_URL` | FastAPI サーバーの URL | `http://localhost:8000` |
+| `API_BASE_URL` | FastAPI サーバーの URL（MCP ツールが内部で使用） | `http://localhost:8000` |
