@@ -1,7 +1,10 @@
+import asyncio
 import uuid
+from datetime import datetime
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from mcp_server import mcp
@@ -72,3 +75,19 @@ def delete_note(note_id: str):
     if note_id not in _notes:
         raise HTTPException(status_code=404, detail="Note not found")
     del _notes[note_id]
+
+
+@app.get("/stream")
+async def stream(max_count: int = 10):
+    """
+    ストリーミング検証用エンドポイント
+    1秒ごとにメッセージを出力する
+    """
+    async def event_generator():
+        for i in range(1, max_count + 1):
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            yield f"data: Message {i}/{max_count} at {current_time}\n\n"
+            
+            await asyncio.sleep(1.0)
+            
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
