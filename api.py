@@ -84,6 +84,6 @@ async def stream(max_count: int = 10):
     """
     for i in range(1, max_count + 1):
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"Message {i}/{max_count} at {current_time}", flush=True)
+        print(f"Message {i}/{max_count} at {current_time}")
         await asyncio.sleep(1.0)
     return {"status": "done", "count": max_count}
