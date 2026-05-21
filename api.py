@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from mcp_server import mcp
@@ -80,14 +79,11 @@ def delete_note(note_id: str):
 @app.get("/stream")
 async def stream(max_count: int = 10):
     """
-    ストリーミング検証用エンドポイント
-    1秒ごとにメッセージを出力する
+    lnar log streaming 検証用エンドポイント。
+    1秒ごとに stdout に print する。HTTP レスポンスは print 完了後に返る。
     """
-    async def event_generator():
-        for i in range(1, max_count + 1):
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            yield f"data: Message {i}/{max_count} at {current_time}\n\n"
-            
-            await asyncio.sleep(1.0)
-            
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    for i in range(1, max_count + 1):
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Message {i}/{max_count} at {current_time}", flush=True)
+        await asyncio.sleep(1.0)
+    return {"status": "done", "count": max_count}
