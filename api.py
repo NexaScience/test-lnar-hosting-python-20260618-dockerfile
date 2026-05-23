@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
@@ -8,10 +9,24 @@ from pydantic import BaseModel
 
 from mcp_server import mcp
 
-app = FastAPI(title="Notes API", version="1.0.0")
+# FastMCP の Streamable HTTP アプリ。`path="/"` にすることで、`/mcp` に
+# マウントしたときに最終 URL が `/mcp/` で到達できる。
+_mcp_app = mcp.http_app(path="/")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # FastMCP の StreamableHTTPSessionManager は親 ASGI の lifespan で
+    # 初期化される。これを伝搬しないと POST /mcp/ が
+    # "task group was not initialized" で 500 になる。
+    async with _mcp_app.lifespan(app):
+        yield
+
+
+app = FastAPI(title="Notes API", version="1.0.0", lifespan=lifespan)
 
 # MCP Streamable HTTP エンドポイントを /mcp にマウント
-app.mount("/mcp", mcp.http_app(path="/"))
+app.mount("/mcp", _mcp_app)
 
 # In-memory storage
 _notes: dict[str, dict] = {}
