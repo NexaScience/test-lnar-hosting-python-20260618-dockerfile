@@ -18,9 +18,9 @@ API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 mcp = FastMCP("notes-mcp-server")
 
 
-def _get(path: str) -> dict | list:
+def _get(path: str, params: dict | None = None) -> dict | list:
     with httpx.Client() as client:
-        r = client.get(f"{API_BASE_URL}{path}")
+        r = client.get(f"{API_BASE_URL}{path}", params=params)
         r.raise_for_status()
         return r.json()
 
