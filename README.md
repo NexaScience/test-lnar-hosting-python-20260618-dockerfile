@@ -47,9 +47,3 @@ python mcp_server.py
 ```bash
 npx @modelcontextprotocol/inspector python mcp_server.py
 ```
-
-## 環境変数
-
-| 変数名 | 説明 | デフォルト値 |
-|---|---|---|
-| `API_BASE_URL` | FastAPI サーバーの URL（MCP ツールが内部で使用） | `http://localhost:8000` |

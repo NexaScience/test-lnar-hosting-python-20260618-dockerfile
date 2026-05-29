@@ -1,5 +1,4 @@
 import asyncio
-import os
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -49,11 +48,6 @@ class Note(BaseModel):
     content: str
 
 
-class Greeting(BaseModel):
-    message: str
-    source_env: str
-
-
 @app.get("/notes", response_model=list[Note])
 def list_notes():
     """ノートの一覧を返す"""
@@ -95,13 +89,6 @@ def delete_note(note_id: str):
     if note_id not in _notes:
         raise HTTPException(status_code=404, detail="Note not found")
     del _notes[note_id]
-
-
-@app.get("/greeting", response_model=Greeting)
-def get_greeting(name: str = "world"):
-    """環境変数 GREETING を元に挨拶を返す。"""
-    template = os.getenv("GREETING", "not set")
-    return Greeting(message=f"{template}, {name}!", source_env="GREETING")
 
 
 @app.get("/stream")
