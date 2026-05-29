@@ -8,12 +8,11 @@ Usage:
 """
 
 import json
-import os
 
 import httpx
 from fastmcp import FastMCP
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+API_BASE_URL = "http://localhost:8000"
 
 mcp = FastMCP("notes-mcp-server")
 
@@ -107,17 +106,6 @@ def delete_note(note_id: str) -> str:
     """
     _delete(f"/notes/{note_id}")
     return f"Note {note_id} deleted successfully."
-
-
-@mcp.tool()
-def get_greeting(name: str = "world") -> str:
-    """環境変数 GREETING を使って挨拶メッセージを取得する。
-
-    Args:
-        name: 挨拶を向ける相手の名前（省略時は "world"）
-    """
-    result = _get("/greeting", params={"name": name})
-    return json.dumps(result, ensure_ascii=False, indent=2)
 
 
 if __name__ == "__main__":
