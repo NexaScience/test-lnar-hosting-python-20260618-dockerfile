@@ -32,6 +32,12 @@ app.mount("/mcp", _mcp_app)
 _notes: dict[str, dict] = {}
 
 
+@app.get("/health")
+def health():
+    """ヘルスチェック用エンドポイント"""
+    return {"status": "ok"}
+
+
 class NoteCreate(BaseModel):
     title: str
     content: str
@@ -52,6 +58,12 @@ class Note(BaseModel):
 def list_notes():
     """ノートの一覧を返す"""
     return list(_notes.values())
+
+
+@app.get("/notes/count")
+def count_notes():
+    """保存されているノートの件数を返す"""
+    return {"count": len(_notes)}
 
 
 @app.post("/notes", response_model=Note, status_code=201)
