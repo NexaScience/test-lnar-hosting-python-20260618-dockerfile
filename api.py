@@ -32,6 +32,12 @@ app.mount("/mcp", _mcp_app)
 _notes: dict[str, dict] = {}
 
 
+@app.get("/health")
+def health():
+    """ヘルスチェック用エンドポイント"""
+    return {"status": "ok"}
+
+
 class NoteCreate(BaseModel):
     title: str
     content: str
