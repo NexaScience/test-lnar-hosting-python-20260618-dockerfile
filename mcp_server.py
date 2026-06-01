@@ -69,6 +69,13 @@ def create_note(title: str, content: str) -> str:
 
 
 @mcp.tool()
+def count_notes() -> str:
+    """保存されているノートの件数を取得する。"""
+    result = _get("/notes/count")
+    return json.dumps(result, ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
 def get_note(note_id: str) -> str:
     """IDを指定してノートを取得する。
 

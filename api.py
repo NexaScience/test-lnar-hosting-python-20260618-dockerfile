@@ -54,6 +54,12 @@ def list_notes():
     return list(_notes.values())
 
 
+@app.get("/notes/count")
+def count_notes():
+    """保存されているノートの件数を返す"""
+    return {"count": len(_notes)}
+
+
 @app.post("/notes", response_model=Note, status_code=201)
 def create_note(body: NoteCreate):
     """新しいノートを作成する"""
