@@ -47,23 +47,29 @@ def version():
 class NoteCreate(BaseModel):
     title: str
     content: str
+    tags: list[str] = []
 
 
 class NoteUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
+    tags: Optional[list[str]] = None
 
 
 class Note(BaseModel):
     id: str
     title: str
     content: str
+    tags: list[str] = []
 
 
 @app.get("/notes", response_model=list[Note])
-def list_notes():
-    """ノートの一覧を返す"""
-    return list(_notes.values())
+def list_notes(tag: Optional[str] = None):
+    """ノートの一覧を返す。`tag` を指定するとそのタグを持つノートのみを返す。"""
+    notes = list(_notes.values())
+    if tag is not None:
+        notes = [n for n in notes if tag in n.get("tags", [])]
+    return notes
 
 
 @app.get("/notes/count")
@@ -76,7 +82,12 @@ def count_notes():
 def create_note(body: NoteCreate):
     """新しいノートを作成する"""
     note_id = str(uuid.uuid4())
-    note = {"id": note_id, "title": body.title, "content": body.content}
+    note = {
+        "id": note_id,
+        "title": body.title,
+        "content": body.content,
+        "tags": list(body.tags),
+    }
     _notes[note_id] = note
     return note
 
@@ -104,13 +115,15 @@ def get_note(note_id: str):
 
 @app.put("/notes/{note_id}", response_model=Note)
 def update_note(note_id: str, body: NoteUpdate):
-    """ノートのタイトルまたは内容を更新する"""
+    """ノートのタイトル、内容、またはタグを更新する"""
     if note_id not in _notes:
         raise HTTPException(status_code=404, detail="Note not found")
     if body.title is not None:
         _notes[note_id]["title"] = body.title
     if body.content is not None:
         _notes[note_id]["content"] = body.content
+    if body.tags is not None:
+        _notes[note_id]["tags"] = list(body.tags)
     return _notes[note_id]
 
 
