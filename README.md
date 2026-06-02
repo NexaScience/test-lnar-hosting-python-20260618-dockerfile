@@ -21,6 +21,20 @@ uvicorn api:app --reload
 - REST API ドキュメント: http://localhost:8000/docs
 - MCP エンドポイント: http://localhost:8000/mcp
 
+## エンドポイント一覧
+
+| Method | Path | 説明 |
+| ------ | ---- | ---- |
+| GET    | `/health` | ヘルスチェック |
+| GET    | `/notes` | ノートの一覧を取得 |
+| GET    | `/notes/count` | ノートの件数を取得 |
+| POST   | `/notes` | ノートを作成 |
+| DELETE | `/notes` | すべてのノートを削除（0件のときは 204） |
+| GET    | `/notes/{note_id}` | ノートを ID で取得 |
+| PUT    | `/notes/{note_id}` | ノートを更新 |
+| DELETE | `/notes/{note_id}` | ノートを削除 |
+| GET    | `/stream` | ログストリーミング検証用 |
+
 ## MCP クライアントからの接続
 
 `supergateway` 経由で Streamable HTTP に接続する場合（lnar ダッシュボードで表示される設定）:
