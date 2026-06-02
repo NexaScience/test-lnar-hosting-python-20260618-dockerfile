@@ -48,6 +48,8 @@ def _delete_json(path: str) -> dict:
     with httpx.Client() as client:
         r = client.delete(f"{API_BASE_URL}{path}")
         r.raise_for_status()
+        if r.status_code == 204 or not r.content:
+            return {"deleted": 0}
         return r.json()
 
 

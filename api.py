@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 
 from mcp_server import mcp
@@ -77,8 +77,13 @@ def create_note(body: NoteCreate):
 
 @app.delete("/notes")
 def delete_all_notes():
-    """すべてのノートを削除する"""
+    """すべてのノートを削除する。
+
+    0件のときは 204 No Content、それ以外は削除件数を返す。
+    """
     deleted = len(_notes)
+    if deleted == 0:
+        return Response(status_code=204)
     _notes.clear()
     return {"deleted": deleted}
 
