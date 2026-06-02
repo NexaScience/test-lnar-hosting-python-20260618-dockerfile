@@ -1,7 +1,7 @@
 import asyncio
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Response
@@ -58,6 +58,12 @@ class Note(BaseModel):
     id: str
     title: str
     content: str
+    created_at: datetime
+    updated_at: datetime
+
+
+def _now_utc() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 @app.get("/notes", response_model=list[Note])
@@ -76,7 +82,14 @@ def count_notes():
 def create_note(body: NoteCreate):
     """新しいノートを作成する"""
     note_id = str(uuid.uuid4())
-    note = {"id": note_id, "title": body.title, "content": body.content}
+    now = _now_utc()
+    note = {
+        "id": note_id,
+        "title": body.title,
+        "content": body.content,
+        "created_at": now,
+        "updated_at": now,
+    }
     _notes[note_id] = note
     return note
 
@@ -107,10 +120,15 @@ def update_note(note_id: str, body: NoteUpdate):
     """ノートのタイトルまたは内容を更新する"""
     if note_id not in _notes:
         raise HTTPException(status_code=404, detail="Note not found")
+    changed = False
     if body.title is not None:
         _notes[note_id]["title"] = body.title
+        changed = True
     if body.content is not None:
         _notes[note_id]["content"] = body.content
+        changed = True
+    if changed:
+        _notes[note_id]["updated_at"] = _now_utc()
     return _notes[note_id]
 
 
