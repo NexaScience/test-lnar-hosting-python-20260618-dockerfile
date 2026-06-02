@@ -35,6 +35,18 @@ uvicorn api:app --reload
 | DELETE | `/notes/{note_id}` | ノートを削除 |
 | GET    | `/stream` | ログストリーミング検証用 |
 
+## MCP ツール一覧
+
+| ツール名 | 説明 |
+| -------- | ---- |
+| `list_notes` | すべてのノートの一覧を取得 |
+| `count_notes` | ノートの件数を取得 |
+| `get_note` | ID を指定してノートを取得 |
+| `create_note` | 新しいノートを作成 |
+| `update_note` | ノートのタイトル/本文を更新 |
+| `delete_note` | ノートを ID で削除 |
+| `delete_all_notes` | すべてのノートを一括削除 |
+
 ## MCP クライアントからの接続
 
 `supergateway` 経由で Streamable HTTP に接続する場合（lnar ダッシュボードで表示される設定）:
