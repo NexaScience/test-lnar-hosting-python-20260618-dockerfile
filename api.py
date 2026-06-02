@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 
 from mcp_server import mcp
@@ -36,6 +36,12 @@ _notes: dict[str, dict] = {}
 def health():
     """ヘルスチェック用エンドポイント"""
     return {"status": "ok"}
+
+
+@app.get("/version")
+def version():
+    """API のバージョン情報を返す"""
+    return {"name": app.title, "version": app.version}
 
 
 class NoteCreate(BaseModel):
@@ -73,6 +79,19 @@ def create_note(body: NoteCreate):
     note = {"id": note_id, "title": body.title, "content": body.content}
     _notes[note_id] = note
     return note
+
+
+@app.delete("/notes")
+def delete_all_notes():
+    """すべてのノートを削除する。
+
+    0件のときは 204 No Content、それ以外は削除件数を返す。
+    """
+    deleted = len(_notes)
+    if deleted == 0:
+        return Response(status_code=204)
+    _notes.clear()
+    return {"deleted": deleted}
 
 
 @app.get("/notes/{note_id}", response_model=Note)
