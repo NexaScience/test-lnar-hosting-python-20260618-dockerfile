@@ -44,6 +44,13 @@ def _delete(path: str) -> None:
         r.raise_for_status()
 
 
+def _delete_json(path: str) -> dict:
+    with httpx.Client() as client:
+        r = client.delete(f"{API_BASE_URL}{path}")
+        r.raise_for_status()
+        return r.json()
+
+
 # ---------------------------------------------------------------------------
 # Tools
 # ---------------------------------------------------------------------------
@@ -113,6 +120,13 @@ def delete_note(note_id: str) -> str:
     """
     _delete(f"/notes/{note_id}")
     return f"Note {note_id} deleted successfully."
+
+
+@mcp.tool()
+def delete_all_notes() -> str:
+    """保存されているすべてのノートを削除する。"""
+    result = _delete_json("/notes")
+    return json.dumps(result, ensure_ascii=False, indent=2)
 
 
 if __name__ == "__main__":

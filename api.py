@@ -75,6 +75,14 @@ def create_note(body: NoteCreate):
     return note
 
 
+@app.delete("/notes")
+def delete_all_notes():
+    """すべてのノートを削除する"""
+    deleted = len(_notes)
+    _notes.clear()
+    return {"deleted": deleted}
+
+
 @app.get("/notes/{note_id}", response_model=Note)
 def get_note(note_id: str):
     """IDでノートを取得する"""
