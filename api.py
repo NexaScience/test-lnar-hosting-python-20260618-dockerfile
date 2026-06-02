@@ -78,6 +78,15 @@ def count_notes():
     return {"count": len(_notes)}
 
 
+@app.get("/notes/tags", response_model=list[str])
+def list_tags():
+    """全ノートに付与されているタグの一覧を重複なし・昇順で返す"""
+    seen: set[str] = set()
+    for note in _notes.values():
+        seen.update(note.get("tags", []))
+    return sorted(seen)
+
+
 @app.post("/notes", response_model=Note, status_code=201)
 def create_note(body: NoteCreate):
     """新しいノートを作成する"""

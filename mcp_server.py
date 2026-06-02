@@ -94,6 +94,13 @@ def count_notes() -> str:
 
 
 @mcp.tool()
+def list_tags() -> str:
+    """全ノートに付与されているタグの一覧を重複なし・昇順で取得する。"""
+    tags = _get("/notes/tags")
+    return json.dumps(tags, ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
 def get_note(note_id: str) -> str:
     """IDを指定してノートを取得する。
 
