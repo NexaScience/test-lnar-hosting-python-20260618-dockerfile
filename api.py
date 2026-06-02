@@ -38,6 +38,12 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/version")
+def version():
+    """API のバージョン情報を返す"""
+    return {"name": app.title, "version": app.version}
+
+
 class NoteCreate(BaseModel):
     title: str
     content: str

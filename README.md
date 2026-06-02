@@ -26,6 +26,7 @@ uvicorn api:app --reload
 | Method | Path | 説明 |
 | ------ | ---- | ---- |
 | GET    | `/health` | ヘルスチェック |
+| GET    | `/version` | API のバージョン情報を取得 |
 | GET    | `/notes` | ノートの一覧を取得 |
 | GET    | `/notes/count` | ノートの件数を取得 |
 | POST   | `/notes` | ノートを作成 |
