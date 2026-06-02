@@ -47,6 +47,24 @@ uvicorn api:app --reload
 | `delete_note` | ノートを ID で削除 |
 | `delete_all_notes` | すべてのノートを一括削除 |
 
+## curl での動作確認
+
+```bash
+# ノート作成
+curl -s -X POST http://localhost:8000/notes \
+  -H 'Content-Type: application/json' \
+  -d '{"title": "memo", "content": "hello"}'
+
+# 一覧取得
+curl -s http://localhost:8000/notes
+
+# 件数取得
+curl -s http://localhost:8000/notes/count
+
+# 一括削除（0件のときは 204 No Content が返る）
+curl -i -X DELETE http://localhost:8000/notes
+```
+
 ## MCP クライアントからの接続
 
 `supergateway` 経由で Streamable HTTP に接続する場合（lnar ダッシュボードで表示される設定）:
