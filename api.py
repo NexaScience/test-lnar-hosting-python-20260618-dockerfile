@@ -66,6 +66,19 @@ def count_notes():
     return {"count": len(_notes)}
 
 
+@app.get("/notes/search", response_model=list[Note])
+def search_notes(q: str):
+    """タイトルまたは本文に検索クエリを含むノートを返す（大文字小文字を区別しない）"""
+    if not q:
+        raise HTTPException(status_code=400, detail="Query parameter 'q' must not be empty")
+    needle = q.lower()
+    return [
+        note
+        for note in _notes.values()
+        if needle in note["title"].lower() or needle in note["content"].lower()
+    ]
+
+
 @app.post("/notes", response_model=Note, status_code=201)
 def create_note(body: NoteCreate):
     """新しいノートを作成する"""
