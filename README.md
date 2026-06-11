@@ -4,6 +4,11 @@ Notes の CRUD を提供する FastAPI サーバーと、それを MCP ツール
 
 FastAPI の `/mcp` に MCP Streamable HTTP エンドポイントをマウントしているため、**1プロセス・1ポートで REST API と MCP の両方を提供します**。
 
+## 必要環境
+
+- Python 3.13 以上
+- [uv](https://docs.astral.sh/uv/) （依存関係管理）
+
 ## 起動方法
 
 ### 1. 依存関係のインストール
