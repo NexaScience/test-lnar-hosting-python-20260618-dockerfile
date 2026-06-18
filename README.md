@@ -1,94 +1,40 @@
-# test-lnar-hosting-python
+# test-lnar-hosting-python (Dockerfile 検知マトリクス)
 
-Notes の CRUD を提供する FastAPI サーバーと、それを MCP ツールとして公開する MCP サーバーのサンプルです。
+ユーザー指定 Dockerfile の検知・実行を検証するためのテストリポジトリ。
+アプリ本体は FastAPI + FastMCP（`api.py` / `mcp_server.py`、`/mcp` と `/health` を 1 プロセスで提供）。
 
-FastAPI の `/mcp` に MCP Streamable HTTP エンドポイントをマウントしているため、**1プロセス・1ポートで REST API と MCP の両方を提供します**。
+1 つのリポジトリに複数の Dockerfile を置き、`dockerfile_path`（repo 単位の設定）でどれを使うかを
+切り替える。すべて**同一の production ブランチ**で動かせる。
 
-## 起動方法
+## 構成（1リポジトリ・同一 production ブランチ）
 
-### 1. 依存関係のインストール
-
-```bash
-uv sync
+```
+Dockerfile                      # baseline: 単一ステージ, :8000
+variants/port3000/Dockerfile    # :3000 → serverless socat 中継
+variants/amd64only/Dockerfile   # FROM --platform=linux/amd64 → serverless arm64 fail-fast
+variants/alias/Dockerfile       # 最終ステージ FROM base（alias 解決）
+variants/distroless/Dockerfile  # distroless 最終 → serverless fail-fast（fixture）
+variants/buildkit/Dockerfile    # RUN --mount= → Kaniko 自然失敗
+variants/README.md              # 設定×期待結果のマトリクス表
 ```
 
-### 2. サーバーを起動
+すべての variant は、ビルドコンテキスト = リポジトリルートで同じアプリ
+（`api.py` + `mcp_server.py`）をビルドする。
 
-```bash
-uvicorn api:app --reload
-```
+## テスト方法（設定切替で全網羅）
 
-- REST API ドキュメント: http://localhost:8000/docs
-- MCP エンドポイント: http://localhost:8000/mcp
+`dockerfile_path` と `is_serverless` を変えて **fresh analyze-and-deploy** するだけ。
 
-## エンドポイント一覧
+> 注意: redeploy は cached_experiment を優先するため、`dockerfile_path` を切り替えるときは
+> **新規 analyze-and-deploy**（再解析）で回すこと。
 
-| Method | Path | 説明 |
-| ------ | ---- | ---- |
-| GET    | `/health` | ヘルスチェック |
-| GET    | `/version` | API のバージョン情報を取得 |
-| GET    | `/notes` | ノートの一覧を取得 |
-| GET    | `/notes/count` | ノートの件数を取得 |
-| POST   | `/notes` | ノートを作成 |
-| DELETE | `/notes` | すべてのノートを削除（0件のときは 204） |
-| GET    | `/notes/{note_id}` | ノートを ID で取得 |
-| PUT    | `/notes/{note_id}` | ノートを更新 |
-| DELETE | `/notes/{note_id}` | ノートを削除 |
-| GET    | `/stream` | ログストリーミング検証用 |
-
-## MCP ツール一覧
-
-| ツール名 | 説明 |
-| -------- | ---- |
-| `list_notes` | すべてのノートの一覧を取得 |
-| `count_notes` | ノートの件数を取得 |
-| `get_note` | ID を指定してノートを取得 |
-| `create_note` | 新しいノートを作成 |
-| `update_note` | ノートのタイトル/本文を更新 |
-| `delete_note` | ノートを ID で削除 |
-| `delete_all_notes` | すべてのノートを一括削除 |
-
-## curl での動作確認
-
-```bash
-# ノート作成
-curl -s -X POST http://localhost:8000/notes \
-  -H 'Content-Type: application/json' \
-  -d '{"title": "memo", "content": "hello"}'
-
-# 一覧取得
-curl -s http://localhost:8000/notes
-
-# 件数取得
-curl -s http://localhost:8000/notes/count
-
-# 一括削除（0件のときは 204 No Content が返る）
-curl -i -X DELETE http://localhost:8000/notes
-```
-
-## MCP クライアントからの接続
-
-`supergateway` 経由で Streamable HTTP に接続する場合（lnar ダッシュボードで表示される設定）:
-
-```json
-{
-  "mcpServers": {
-    "test-lnar-hosting-python": {
-      "command": "npx",
-      "args": ["-y", "supergateway", "--streamableHttp", "http://localhost:8000/mcp"]
-    }
-  }
-}
-```
-
-stdio transport（Claude Desktop / MCP Inspector 直接接続）を使う場合:
-
-```bash
-python mcp_server.py
-```
-
-### MCP Inspector で動作確認
-
-```bash
-npx @modelcontextprotocol/inspector python mcp_server.py
-```
+| dockerfile_path      | is_serverless    | 期待                             |
+| -------------------- | ---------------- | -------------------------------- |
+| `""`                 | –                | 自動生成                         |
+| `Dockerfile`         | serverless       | ビルド・起動、中継なし           |
+| `variants/port3000`  | serverless / EKS | 中継あり / port 直結             |
+| `variants/amd64only` | serverless / EKS | fail-fast / ビルド成功           |
+| `variants/alias`     | –                | alias 解決してビルド             |
+| `variants/distroless`| serverless       | fail-fast                        |
+| `variants/buildkit`  | –                | Kaniko 自然失敗                  |
+| `does/not/exist`     | –                | "Dockerfile not found" fail-fast |
