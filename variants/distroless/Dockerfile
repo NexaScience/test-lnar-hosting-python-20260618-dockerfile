@@ -8,7 +8,7 @@ FROM python:3.13-slim AS builder
 WORKDIR /app
 RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock ./
-RUN uv export --frozen --no-dev --no-emit-project -o requirements.txt \
+RUN uv export --no-dev --no-emit-project -o requirements.txt \
     && pip install --no-cache-dir --target=/site-packages -r requirements.txt
 COPY api.py mcp_server.py ./
 

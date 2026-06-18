@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir uv
 
 # Install dependencies from the locked manifest (no project install needed).
 COPY pyproject.toml uv.lock ./
-RUN uv export --frozen --no-dev --no-emit-project -o requirements.txt \
+RUN uv export --no-dev --no-emit-project -o requirements.txt \
     && pip install --no-cache-dir -r requirements.txt
 
 COPY . .

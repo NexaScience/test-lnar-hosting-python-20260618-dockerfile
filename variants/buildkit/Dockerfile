@@ -10,7 +10,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/pip \
-    uv export --frozen --no-dev --no-emit-project -o requirements.txt \
+    uv export --no-dev --no-emit-project -o requirements.txt \
     && pip install -r requirements.txt
 
 COPY api.py mcp_server.py ./
